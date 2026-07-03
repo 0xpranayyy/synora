@@ -233,6 +233,14 @@ const STOPWORDS = new Set([
   "to", "of", "for", "before", "after", "this", "that", "it", "and", "or",
   "what", "who", "when", "which", "how", "does", "do", "did", "has", "have",
   "new", "next", "year", "today", "hit", "reach", "there",
+  // Conversational/trading filler that dilutes relevance scoring and,
+  // when sent to Polymarket's search endpoint, actively degrades result
+  // quality (confirmed empirically — "market"/"markets" especially).
+  "show", "explain", "compare", "should", "buy", "sell", "yes", "no", "me",
+  "my", "you", "your", "think", "traders", "trader", "missing", "insight",
+  "insights", "opportunity", "opportunities", "about", "affected", "vs",
+  "market", "markets", "tell", "us", "we", "our", "please", "can", "could",
+  "would", "want", "looking", "find", "give", "get",
 ]);
 
 function queryTerms(query: string): string[] {
@@ -253,13 +261,22 @@ function relevance(terms: string[], text: string): number {
  * Full-text search over Polymarket via the public search endpoint,
  * re-ranked by keyword relevance (the API's own ranking is noisy)
  * with 24h volume as the tiebreaker.
+ *
+ * The query sent to Polymarket is built from extracted keywords, not the
+ * raw input — its search endpoint performs far worse on full natural-
+ * language sentences than on bare topic keywords. Queries with no
+ * extractable keyword (e.g. "What are traders missing?") have no real
+ * topic to search for, so we return no results rather than falling back
+ * to the raw sentence or to volume-sorted noise.
  */
 export async function searchMarkets(query: string, limit = 8): Promise<Market[]> {
+  const terms = queryTerms(query);
+  if (terms.length === 0) return [];
+
   const data = await gammaLive(
-    `/public-search?q=${encodeURIComponent(query)}&limit_per_type=${limit * 2}&events_status=active`
+    `/public-search?q=${encodeURIComponent(terms.join(" "))}&limit_per_type=${limit * 2}&events_status=active`
   );
   const events: Raw[] = Array.isArray(data?.events) ? data.events : [];
-  const terms = queryTerms(query);
 
   const scored: { market: Market; score: number }[] = [];
   for (const event of events) {
@@ -270,13 +287,11 @@ export async function searchMarkets(query: string, limit = 8): Promise<Market[]>
       .sort((a: Market, b: Market) => b.volumeUsd - a.volumeUsd);
     const top = candidates[0];
     if (!top) continue;
-    scored.push({
-      market: top,
-      score: Math.max(
-        relevance(terms, `${event.title} ${top.question}`),
-        relevance(terms, String(event.title ?? ""))
-      ),
-    });
+    const score = Math.max(
+      relevance(terms, `${event.title} ${top.question}`),
+      relevance(terms, String(event.title ?? ""))
+    );
+    if (score > 0) scored.push({ market: top, score });
   }
 
   return scored

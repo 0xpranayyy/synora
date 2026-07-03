@@ -15,13 +15,15 @@ export function HomeHero({
   return (
     <section className="relative pt-4 md:pt-8">
       <div className="relative text-center">
-        <div className="reveal mx-auto mb-8 inline-block rounded-3xl bg-[#14161f] px-8 py-5 shadow-[0_16px_36px_-8px_rgba(124,137,255,0.18)]">
+        <div className="reveal group relative mx-auto mb-8 inline-block">
+          {/* Soft ambient glow, no hard-edged backdrop — blooms on hover */}
+          <div className="pointer-events-none absolute inset-0 -z-10 scale-110 rounded-full bg-gradient-to-br from-accent/30 via-lilac/20 to-transparent opacity-70 blur-3xl transition-all duration-500 ease-out group-hover:scale-125 group-hover:opacity-100" />
           <Image
             src="/brand/synora-wordmark.png"
             alt="Synora"
             width={320}
             height={110}
-            className="h-auto w-[192px] opacity-[0.97] md:w-[260px]"
+            className="relative h-auto w-[192px] opacity-[0.97] transition-all duration-500 ease-out md:w-[260px] group-hover:scale-[1.03] group-hover:opacity-100 group-hover:drop-shadow-[0_8px_28px_rgba(124,137,255,0.4)]"
             priority
           />
         </div>
