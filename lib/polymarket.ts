@@ -1,8 +1,12 @@
+import {
+  getMicrostructure,
+  getPriceHistory,
+  type PriceInterval,
+} from "./clob-client";
 import type { Market, PricePoint } from "./types";
 
 /** Polymarket Gamma API — events, markets, tags, search. */
 export const GAMMA = "https://gamma-api.polymarket.com";
-const CLOB = "https://clob.polymarket.com";
 
 /** Base filters for open, tradable markets per Gamma API conventions. */
 const OPEN_MARKET = "closed=false&active=true";
@@ -58,6 +62,34 @@ type GammaFetchOptions = {
   revalidate?: number | false;
 };
 
+/**
+ * Fetch with a timeout and one retry on transient failures (network
+ * errors, 429, 5xx) — the public Gamma API occasionally stalls or
+ * hiccups under load, and a single retry avoids surfacing that as a
+ * hard page crash.
+ */
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  retries = 1
+): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+      const res = await fetch(url, { ...init, signal: controller.signal });
+      const transientError = !res.ok && (res.status === 429 || res.status >= 500);
+      if (transientError && attempt < retries) continue;
+      return res;
+    } catch (error) {
+      if (attempt >= retries) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 async function gamma(
   path: string,
   options: GammaFetchOptions | number = 60
@@ -65,7 +97,7 @@ async function gamma(
   const revalidate =
     typeof options === "number" ? options : (options.revalidate ?? 60);
 
-  const res = await fetch(`${GAMMA}${path}`, {
+  const res = await fetchWithRetry(`${GAMMA}${path}`, {
     ...(revalidate === false
       ? { cache: "no-store" as const }
       : { next: { revalidate } }),
@@ -81,48 +113,14 @@ function gammaLive(path: string): Promise<Raw> {
   return gamma(path, { revalidate: false });
 }
 
-async function clob(path: string, revalidate = 15): Promise<Raw | null> {
-  try {
-    const res = await fetch(`${CLOB}${path}`, { next: { revalidate } });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
-function decimal(value: unknown): number | undefined {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : undefined;
-}
-
-function firstBookPrice(book: Raw | null, side: "bids" | "asks") {
-  const levels = Array.isArray(book?.[side]) ? book?.[side] : [];
-  return decimal(levels[0]?.price);
-}
-
-/** Public CLOB read model for a YES token: top-of-book, midpoint, spread. */
+/**
+ * Live top-of-book, midpoint, spread, and last trade price for a YES
+ * token — sourced from the official @polymarket/clob-client SDK.
+ */
 export async function marketMicrostructure(
   yesTokenId: string | null
 ): Promise<Partial<Market>> {
-  if (!yesTokenId) return {};
-
-  const token = encodeURIComponent(yesTokenId);
-  const [book, midpoint, spread, lastTrade] = await Promise.all([
-    clob(`/book?token_id=${token}`),
-    clob(`/midpoint?token_id=${token}`),
-    clob(`/spread?token_id=${token}`),
-    clob(`/last-trade-price?token_id=${token}`),
-  ]);
-
-  return {
-    bestBid: firstBookPrice(book, "bids"),
-    bestAsk: firstBookPrice(book, "asks"),
-    midpoint: decimal(midpoint?.mid ?? midpoint?.midpoint),
-    spread: decimal(spread?.spread),
-    lastTradePrice: decimal(lastTrade?.price),
-    orderBookHash: typeof book?.hash === "string" ? book.hash : undefined,
-  };
+  return getMicrostructure(yesTokenId);
 }
 
 export async function enrichMarketWithClob(market: Market): Promise<Market> {
@@ -257,9 +255,8 @@ function relevance(terms: string[], text: string): number {
  * with 24h volume as the tiebreaker.
  */
 export async function searchMarkets(query: string, limit = 8): Promise<Market[]> {
-  const data = await gamma(
-    `/public-search?q=${encodeURIComponent(query)}&limit_per_type=${limit * 2}&events_status=active`,
-    30
+  const data = await gammaLive(
+    `/public-search?q=${encodeURIComponent(query)}&limit_per_type=${limit * 2}&events_status=active`
   );
   const events: Raw[] = Array.isArray(data?.events) ? data.events : [];
   const terms = queryTerms(query);
@@ -292,7 +289,7 @@ export async function searchMarkets(query: string, limit = 8): Promise<Market[]>
 }
 
 export async function getMarketBySlug(slug: string): Promise<Market | null> {
-  const raw = (await gamma(
+  const raw = (await gammaLive(
     `/markets?slug=${encodeURIComponent(slug)}`
   )) as Raw[];
   if (!Array.isArray(raw) || raw.length === 0) return null;
@@ -306,18 +303,15 @@ export async function getMarketsBySlugs(slugs: string[]): Promise<Market[]> {
   return results.filter((m): m is Market => m !== null);
 }
 
-/** YES price history from the CLOB. */
+/**
+ * Live YES price history — sourced from the official
+ * @polymarket/clob-client SDK, no caching.
+ */
 export async function priceHistory(
   yesTokenId: string,
-  interval: "1d" | "1w" | "1m" | "max" = "1m"
+  interval: PriceInterval = "1m"
 ): Promise<PricePoint[]> {
-  const res = await fetch(
-    `${CLOB}/prices-history?market=${yesTokenId}&interval=${interval}&fidelity=180`,
-    { next: { revalidate: 300 } }
-  );
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data?.history) ? data.history : [];
+  return getPriceHistory(yesTokenId, interval, 180);
 }
 
 export function formatUsd(value: number): string {

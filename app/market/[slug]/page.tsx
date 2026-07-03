@@ -4,11 +4,10 @@ import { Suspense } from "react";
 import { ResearchView } from "@/components/research-view";
 import { WatchlistButton } from "@/components/watchlist-button";
 import { PriceChart } from "@/components/price-chart";
-import { CountUp } from "@/components/count-up";
+import { LiveMarketStats } from "@/components/live-market-stats";
 import { ResearchSkeleton } from "@/components/skeletons";
 import {
   enrichMarketWithClob,
-  formatUsd,
   getMarketBySlug,
   priceHistory,
 } from "@/lib/polymarket";
@@ -30,7 +29,6 @@ export default async function MarketPage({
   const history = market.yesTokenId
     ? await priceHistory(market.yesTokenId, "1m")
     : [];
-  const rising = market.change24h >= 0;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -55,65 +53,7 @@ export default async function MarketPage({
         <WatchlistButton slug={market.slug} />
       </div>
 
-      <div className="reveal d-1 mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Stat label="Probability">
-          <span className="font-mono text-[26px] font-semibold tracking-tight tabular-nums">
-            <CountUp value={market.probability} />
-            <span className="text-sm text-faint">%</span>
-          </span>
-          <span
-            className={`ml-2 rounded-full px-2 py-0.5 font-mono text-[11px] font-medium ${
-              rising ? "bg-mint-soft text-mint" : "bg-rose-soft text-rose"
-            }`}
-          >
-            {rising ? "↑" : "↓"} {Math.abs(market.change24h).toFixed(1)}
-          </span>
-        </Stat>
-        <Stat label="Volume">
-          <span className="font-mono text-[22px]">
-            {formatUsd(market.volumeUsd)}
-          </span>
-        </Stat>
-        <Stat label="Liquidity">
-          <span className="font-mono text-[22px]">
-            {formatUsd(market.liquidityUsd)}
-          </span>
-        </Stat>
-        <Stat label="Resolves">
-          <span className="font-mono text-[15px]">
-            {market.endDate
-              ? new Date(market.endDate).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
-              : "TBD"}
-          </span>
-        </Stat>
-      </div>
-
-      <div className="reveal d-2 mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Stat label="Best bid">
-          <span className="font-mono text-[22px]">
-            {percentOrDash(market.bestBid)}
-          </span>
-        </Stat>
-        <Stat label="Best ask">
-          <span className="font-mono text-[22px]">
-            {percentOrDash(market.bestAsk)}
-          </span>
-        </Stat>
-        <Stat label="Midpoint">
-          <span className="font-mono text-[22px]">
-            {percentOrDash(market.midpoint)}
-          </span>
-        </Stat>
-        <Stat label="Spread">
-          <span className="font-mono text-[22px]">
-            {percentOrDash(market.spread)}
-          </span>
-        </Stat>
-      </div>
+      <LiveMarketStats initialMarket={market} />
 
       <div className="reveal d-3 mt-4 rounded-[20px] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-faint mb-4">
@@ -140,23 +80,4 @@ async function MarketResearch({
 }) {
   const research = await runResearch(market, history, market.question);
   return <ResearchView research={research} />;
-}
-
-function Stat({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[20px] border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-      <p className="text-xs text-muted mb-2">{label}</p>
-      <div className="flex items-baseline">{children}</div>
-    </div>
-  );
-}
-
-function percentOrDash(value: number | undefined): string {
-  return value === undefined ? "—" : `${(value * 100).toFixed(1)}%`;
 }

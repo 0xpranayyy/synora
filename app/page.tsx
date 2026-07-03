@@ -29,7 +29,6 @@ export default async function Home() {
           trending={trendingFeed.markets}
           hot={hotFeed.markets}
           featured={featuredFeed.markets}
-          fetchedAt={trendingFeed.fetchedAt}
         />
       </div>
     </div>

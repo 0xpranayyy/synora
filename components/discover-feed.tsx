@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { MarketCard } from "@/components/market-card";
 import { LiveSyncBadge } from "@/components/live-sync-badge";
+import { useLiveData } from "@/lib/use-live-data";
 import type { DiscoverFeed } from "@/lib/discover";
 import type { Market } from "@/lib/types";
 
@@ -13,24 +14,21 @@ export function DiscoverFeed({
   initialFeed: DiscoverFeed;
   category?: string;
 }) {
-  const [feed, setFeed] = useState(initialFeed);
-  const [refreshing, setRefreshing] = useState(false);
+  const fetchFeed = useCallback(async () => {
+    const params = new URLSearchParams({ limit: "12" });
+    if (category) params.set("category", category);
+    else params.set("view", initialFeed.view);
 
-  const refresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      const params = new URLSearchParams({ limit: "12" });
-      if (category) params.set("category", category);
-      else params.set("view", feed.view);
+    const res = await fetch(`/api/discover?${params}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Refresh failed");
+    return (await res.json()) as DiscoverFeed;
+  }, [category, initialFeed.view]);
 
-      const res = await fetch(`/api/discover?${params}`);
-      if (!res.ok) throw new Error("Refresh failed");
-      const data: DiscoverFeed = await res.json();
-      setFeed(data);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [category, feed.view]);
+  const { data: feed, refresh, isRefreshing } = useLiveData(
+    initialFeed,
+    fetchFeed,
+    { intervalMs: 12_000 }
+  );
 
   return (
     <div>
@@ -39,11 +37,11 @@ export function DiscoverFeed({
         <button
           type="button"
           onClick={refresh}
-          disabled={refreshing}
+          disabled={isRefreshing}
           className="btn-press inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted hover:border-accent/40 hover:text-foreground disabled:opacity-50"
         >
-          <RefreshIcon spinning={refreshing} />
-          {refreshing ? "Refreshing…" : "Refresh"}
+          <RefreshIcon spinning={isRefreshing} />
+          {isRefreshing ? "Refreshing…" : "Refresh"}
         </button>
       </div>
 

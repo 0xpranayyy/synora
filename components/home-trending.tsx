@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { LiveSyncBadge } from "@/components/live-sync-badge";
 import { TrendingMarketCard } from "@/components/trending-market-card";
+import { useLiveData } from "@/lib/use-live-data";
 import type { DiscoverView } from "@/lib/discover";
 import type { Market } from "@/lib/types";
 
@@ -27,27 +28,44 @@ const TABS: { id: Tab; label: string; hint: string }[] = [
   },
 ];
 
-const DISCOVER_LINKS: Record<Tab, DiscoverView> = {
-  trending: "trending",
-  hot: "hot",
-  featured: "featured",
-};
+async function fetchView(view: DiscoverView): Promise<Market[]> {
+  const res = await fetch(`/api/discover?view=${view}&limit=6`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Refresh failed");
+  const data = await res.json();
+  return Array.isArray(data?.markets) ? data.markets : [];
+}
+
+/** Live, auto-refreshing collection for a single home tab. */
+function useTabMarkets(view: DiscoverView, initial: Market[], active: boolean) {
+  const fetcher = useCallback(() => fetchView(view), [view]);
+  return useLiveData(initial, fetcher, { intervalMs: 15_000, enabled: active });
+}
 
 export function HomeTrending({
   trending,
   hot,
   featured,
-  fetchedAt,
 }: {
   trending: Market[];
   hot: Market[];
   featured: Market[];
-  fetchedAt: string;
 }) {
   const [tab, setTab] = useState<Tab>("trending");
 
-  const collections: Record<Tab, Market[]> = { trending, hot, featured };
-  const markets = collections[tab];
+  const trendingLive = useTabMarkets("trending", trending, tab === "trending");
+  const hotLive = useTabMarkets("hot", hot, tab === "hot");
+  const featuredLive = useTabMarkets("featured", featured, tab === "featured");
+
+  const byTab: Record<Tab, ReturnType<typeof useLiveData<Market[]>>> = {
+    trending: trendingLive,
+    hot: hotLive,
+    featured: featuredLive,
+  };
+
+  const active = byTab[tab];
+  const markets = active.data;
   const activeTab = TABS.find((t) => t.id === tab)!;
 
   return (
@@ -65,9 +83,9 @@ export function HomeTrending({
           <p className="mt-1.5 text-sm text-muted">{activeTab.hint}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <LiveSyncBadge fetchedAt={fetchedAt} />
+          <LiveSyncBadge fetchedAt={active.lastUpdated.toISOString()} />
           <Link
-            href={`/discover?view=${DISCOVER_LINKS[tab]}`}
+            href={`/discover?view=${tab}`}
             className="glass-pill inline-flex w-fit items-center gap-1.5 px-4 py-2 text-sm font-medium text-accent-ink hover:brightness-105"
           >
             Discover all
