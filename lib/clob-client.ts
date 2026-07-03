@@ -1,3 +1,4 @@
+import { BuilderConfig } from "@polymarket/builder-signing-sdk";
 import { ClobClient, Chain, type PriceHistoryInterval } from "@polymarket/clob-client";
 import type { PricePoint } from "./types";
 
@@ -10,11 +11,37 @@ export type PriceInterval = "1h" | "6h" | "1d" | "1w" | "max" | "1m";
 const CLOB_HOST = "https://clob.polymarket.com";
 
 /**
- * Official Polymarket CLOB SDK client, public read-only mode (no signer/
- * API credentials). Used for order book, midpoint, spread, last trade
- * price, and price history — all live, uncached reads.
+ * Polymarket Builders Program attribution. When builder API credentials
+ * are configured, the SDK HMAC-signs eligible requests with
+ * POLY_BUILDER_* headers so activity routed through Synora is attributed
+ * to its registered builder code (POLYMARKET_BUILDER_CODE). Fails open:
+ * without credentials the client stays plain public read-only.
  */
-const client = new ClobClient(CLOB_HOST, Chain.POLYGON);
+function builderConfig(): BuilderConfig | undefined {
+  const key = process.env.POLYMARKET_BUILDER_API_KEY;
+  const secret = process.env.POLYMARKET_BUILDER_SECRET;
+  const passphrase = process.env.POLYMARKET_BUILDER_PASSPHRASE;
+  if (!key || !secret || !passphrase) return undefined;
+  return new BuilderConfig({ localBuilderCreds: { key, secret, passphrase } });
+}
+
+/**
+ * Official Polymarket CLOB SDK client — no signer (Synora never places
+ * orders), builder-attributed when credentials are configured. Used for
+ * order book, midpoint, spread, last trade price, and price history —
+ * all live, uncached reads.
+ */
+const client = new ClobClient(
+  CLOB_HOST,
+  Chain.POLYGON,
+  undefined, // signer
+  undefined, // L2 api creds
+  undefined, // signature type
+  undefined, // funder address
+  undefined, // geo-block token
+  undefined, // use server time
+  builderConfig()
+);
 
 export interface Microstructure {
   bestBid?: number;

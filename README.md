@@ -37,6 +37,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_APP_URL` | App URL for WalletConnect metadata |
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Optional WalletConnect project ID |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional — enables per-IP rate limiting and AI response caching (see Production hardening below) |
+| `POLYMARKET_BUILDER_API_KEY` / `_SECRET` / `_PASSPHRASE` | Optional — Polymarket Builders Program credentials; attribute CLOB activity to your builder identity |
+| `POLYMARKET_BUILDER_CODE` | Public builder attribution code registered with Polymarket |
 
 For free local AI, install Ollama and pull a model:
 
