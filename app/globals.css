@@ -1,113 +1,9 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-/*
- * Registering these as typed <color> custom properties is what makes the
- * theme toggle's cross-fade actually work. Unregistered custom properties
- * are just opaque token streams — a consuming property like background-color
- * can have `transition: background-color 0.3s` all day, but if its value
- * comes from an unregistered var() the browser can't interpolate between
- * the old and new color and it just snaps. This has to cover both the base
- * tokens below and their @theme inline aliases, since the alias is itself
- * an unregistered custom property unless it's declared too.
- */
-@property --background { syntax: "<color>"; inherits: true; initial-value: #f7f6fc; }
-@property --card { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
-@property --foreground { syntax: "<color>"; inherits: true; initial-value: #191a23; }
-@property --muted { syntax: "<color>"; inherits: true; initial-value: #71748a; }
-@property --faint { syntax: "<color>"; inherits: true; initial-value: #a3a6bd; }
-@property --accent { syntax: "<color>"; inherits: true; initial-value: #6b7bf7; }
-@property --accent-ink { syntax: "<color>"; inherits: true; initial-value: #4a58d8; }
-@property --accent-soft { syntax: "<color>"; inherits: true; initial-value: #eceefe; }
-@property --mint { syntax: "<color>"; inherits: true; initial-value: #16b981; }
-@property --mint-soft { syntax: "<color>"; inherits: true; initial-value: #e3f8f0; }
-@property --rose { syntax: "<color>"; inherits: true; initial-value: #ef5d84; }
-@property --rose-soft { syntax: "<color>"; inherits: true; initial-value: #fdeaf0; }
-@property --peach { syntax: "<color>"; inherits: true; initial-value: #ec9d4b; }
-@property --peach-soft { syntax: "<color>"; inherits: true; initial-value: #fdf1e3; }
-@property --lilac { syntax: "<color>"; inherits: true; initial-value: #a78bfa; }
-@property --lilac-soft { syntax: "<color>"; inherits: true; initial-value: #f3eefe; }
-@property --border { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.07); }
-@property --border-strong { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.12); }
-@property --grid-line { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.06); }
-@property --skeleton-base { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.045); }
-@property --skeleton-shine { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.09); }
-@property --glass-bg { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.72); }
-@property --glass-border { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.85); }
-@property --glass-highlight { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.55); }
-@property --home-mesh-a { syntax: "<color>"; inherits: true; initial-value: rgba(107, 123, 247, 0.16); }
-@property --home-mesh-b { syntax: "<color>"; inherits: true; initial-value: rgba(167, 139, 250, 0.11); }
-@property --home-mesh-c { syntax: "<color>"; inherits: true; initial-value: rgba(107, 123, 247, 0.07); }
-
-@property --color-background { syntax: "<color>"; inherits: true; initial-value: #f7f6fc; }
-@property --color-card { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
-@property --color-foreground { syntax: "<color>"; inherits: true; initial-value: #191a23; }
-@property --color-muted { syntax: "<color>"; inherits: true; initial-value: #71748a; }
-@property --color-faint { syntax: "<color>"; inherits: true; initial-value: #a3a6bd; }
-@property --color-accent { syntax: "<color>"; inherits: true; initial-value: #6b7bf7; }
-@property --color-accent-ink { syntax: "<color>"; inherits: true; initial-value: #4a58d8; }
-@property --color-accent-soft { syntax: "<color>"; inherits: true; initial-value: #eceefe; }
-@property --color-mint { syntax: "<color>"; inherits: true; initial-value: #16b981; }
-@property --color-mint-soft { syntax: "<color>"; inherits: true; initial-value: #e3f8f0; }
-@property --color-rose { syntax: "<color>"; inherits: true; initial-value: #ef5d84; }
-@property --color-rose-soft { syntax: "<color>"; inherits: true; initial-value: #fdeaf0; }
-@property --color-peach { syntax: "<color>"; inherits: true; initial-value: #ec9d4b; }
-@property --color-peach-soft { syntax: "<color>"; inherits: true; initial-value: #fdf1e3; }
-@property --color-lilac { syntax: "<color>"; inherits: true; initial-value: #a78bfa; }
-@property --color-lilac-soft { syntax: "<color>"; inherits: true; initial-value: #f3eefe; }
-@property --color-border { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.07); }
-@property --color-border-strong { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.12); }
-
 :root {
-  color-scheme: light;
-
-  /* Pastel light theme */
-  --background: #f7f6fc;
-  --card: #ffffff;
-  --foreground: #191a23;
-  --muted: #71748a;
-  --faint: #a3a6bd;
-
-  --accent: #6b7bf7;
-  --accent-ink: #4a58d8;
-  --accent-soft: #eceefe;
-
-  --mint: #16b981;
-  --mint-soft: #e3f8f0;
-
-  --rose: #ef5d84;
-  --rose-soft: #fdeaf0;
-
-  --peach: #ec9d4b;
-  --peach-soft: #fdf1e3;
-
-  --lilac: #a78bfa;
-  --lilac-soft: #f3eefe;
-
-  --border: rgba(25, 26, 35, 0.07);
-  --border-strong: rgba(25, 26, 35, 0.12);
-  --grid-line: rgba(25, 26, 35, 0.06);
-  --skeleton-base: rgba(25, 26, 35, 0.045);
-  --skeleton-shine: rgba(25, 26, 35, 0.09);
-
-  --shadow-card: 0 1px 2px rgba(25, 26, 35, 0.03), 0 6px 24px -8px rgba(25, 26, 35, 0.08);
-  --shadow-lift: 0 2px 4px rgba(25, 26, 35, 0.04), 0 16px 40px -12px rgba(107, 123, 247, 0.22);
-  --shadow-pop: 0 8px 32px -8px rgba(107, 123, 247, 0.35);
-  --shadow-glow: 0 4px 14px -4px rgba(107, 123, 247, 0.6);
-
-  --home-mesh-a: rgba(107, 123, 247, 0.16);
-  --home-mesh-b: rgba(167, 139, 250, 0.11);
-  --home-mesh-c: rgba(107, 123, 247, 0.07);
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-highlight: rgba(255, 255, 255, 0.55);
-}
-
-.dark {
   color-scheme: dark;
 
-  /* Calm dark theme — same pastel accents, deep ink surfaces */
+  /* Calm dark theme — deep ink surfaces, pastel accents */
   --background: #0b0d13;
   --card: #14161f;
   --foreground: #f0f1f7;
@@ -179,21 +75,10 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::selection {
   background: rgba(124, 137, 255, 0.28);
-}
-
-/* Applied briefly while toggling themes so every surface cross-fades */
-.theme-transition,
-.theme-transition * {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease !important;
 }
 
 /* Accessible focus rings, keyboard-only */
@@ -644,16 +529,6 @@ body {
   transform: scale(0.97);
 }
 
-/* Modal / toast entrance */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .pop-in,
@@ -684,10 +559,5 @@ body {
   .card-lift:hover {
     transform: none;
     transition: none;
-  }
-  body,
-  .theme-transition,
-  .theme-transition * {
-    transition: none !important;
   }
 }

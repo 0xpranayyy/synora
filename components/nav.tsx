@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "./theme-toggle";
 import { WalletButton } from "./wallet-button";
 
 const items = [
@@ -20,26 +19,20 @@ export function Nav() {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 shrink-0 flex-col px-5 py-7 sticky top-0 h-screen">
-        <div className="flex items-center justify-between mb-10">
-          <Link href="/" className="flex items-center gap-2.5 px-2 group">
-            {/* Fixed dark tile regardless of theme — the mark's chrome/silver
-                palette needs a dark backdrop for contrast; bg-card would
-                flip to near-white in light mode and wash it out. */}
-            <span className="h-9 w-9 rounded-xl border border-white/10 bg-[#14161f] flex items-center justify-center shadow-[var(--shadow-card)] transition-transform duration-300 group-hover:rotate-[-8deg] group-hover:scale-105">
-              <Image
-                src="/brand/synora-mark.png"
-                alt=""
-                width={28}
-                height={28}
-                className="h-7 w-7 object-contain drop-shadow-[0_4px_10px_rgba(74,88,216,0.22)]"
-              />
-            </span>
-            <span className="font-semibold tracking-tight text-[17px]">
-              Synora
-            </span>
-          </Link>
-          <ThemeToggle compact />
-        </div>
+        <Link href="/" className="flex items-center gap-2.5 px-2 mb-10 group">
+          <span className="h-9 w-9 rounded-xl border border-white/10 bg-[#14161f] flex items-center justify-center shadow-[var(--shadow-card)] transition-transform duration-300 group-hover:rotate-[-8deg] group-hover:scale-105">
+            <Image
+              src="/brand/synora-mark.png"
+              alt=""
+              width={28}
+              height={28}
+              className="h-7 w-7 object-contain drop-shadow-[0_4px_10px_rgba(74,88,216,0.22)]"
+            />
+          </span>
+          <span className="font-semibold tracking-tight text-[17px]">
+            Synora
+          </span>
+        </Link>
         <nav className="flex flex-col gap-1.5">
           {items.map(({ href, label, icon: Icon }) => {
             const active =
@@ -74,9 +67,8 @@ export function Nav() {
       </aside>
 
       {/* Mobile header actions */}
-      <div className="md:hidden fixed top-4 right-4 z-50 flex items-center gap-2">
+      <div className="md:hidden fixed top-4 right-4 z-50">
         <WalletButton compact />
-        <ThemeToggle compact />
       </div>
 
       {/* Mobile bottom bar */}

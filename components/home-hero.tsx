@@ -15,10 +15,7 @@ export function HomeHero({
   return (
     <section className="relative pt-4 md:pt-8">
       <div className="relative text-center">
-        {/* Fixed dark tile regardless of theme — the wordmark's chrome
-            palette needs a dark backdrop; it's unreadable directly on the
-            light theme's near-white page background. */}
-        <div className="reveal mx-auto mb-8 inline-block rounded-3xl bg-[#14161f] px-8 py-5 shadow-[0_14px_32px_-8px_rgba(11,13,19,0.35)] dark:shadow-[0_16px_36px_-8px_rgba(124,137,255,0.18)]">
+        <div className="reveal mx-auto mb-8 inline-block rounded-3xl bg-[#14161f] px-8 py-5 shadow-[0_16px_36px_-8px_rgba(124,137,255,0.18)]">
           <Image
             src="/brand/synora-wordmark.png"
             alt="Synora"
