@@ -283,15 +283,29 @@ export async function searchMarkets(query: string, limit = 8): Promise<Market[]>
     const candidates = (Array.isArray(event.markets) ? event.markets : [])
       .filter((m: Raw) => !m.closed)
       .map((m: Raw) => normalizeMarket({ ...m, events: [event] }))
-      .filter((m: Market | null): m is Market => m !== null)
-      .sort((a: Market, b: Market) => b.volumeUsd - a.volumeUsd);
-    const top = candidates[0];
-    if (!top) continue;
-    const score = Math.max(
-      relevance(terms, `${event.title} ${top.question}`),
-      relevance(terms, String(event.title ?? ""))
-    );
-    if (score > 0) scored.push({ market: top, score });
+      .filter((m: Market | null): m is Market => m !== null);
+    if (candidates.length === 0) continue;
+
+    // Score every market in the event individually, not just the
+    // highest-volume one — multi-outcome events (e.g. "World Cup Winner"
+    // bundling one market per country) otherwise always surface whichever
+    // outcome has the most volume, regardless of which one the query
+    // actually named (asking about Switzerland returned USA).
+    let best: { market: Market; score: number } | null = null;
+    for (const market of candidates) {
+      const score = Math.max(
+        relevance(terms, `${event.title} ${market.question}`),
+        relevance(terms, market.question)
+      );
+      if (
+        !best ||
+        score > best.score ||
+        (score === best.score && market.volume24hUsd > best.market.volume24hUsd)
+      ) {
+        best = { market, score };
+      }
+    }
+    if (best && best.score > 0) scored.push(best);
   }
 
   return scored
