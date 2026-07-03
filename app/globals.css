@@ -2,6 +2,63 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Registering these as typed <color> custom properties is what makes the
+ * theme toggle's cross-fade actually work. Unregistered custom properties
+ * are just opaque token streams — a consuming property like background-color
+ * can have `transition: background-color 0.3s` all day, but if its value
+ * comes from an unregistered var() the browser can't interpolate between
+ * the old and new color and it just snaps. This has to cover both the base
+ * tokens below and their @theme inline aliases, since the alias is itself
+ * an unregistered custom property unless it's declared too.
+ */
+@property --background { syntax: "<color>"; inherits: true; initial-value: #f7f6fc; }
+@property --card { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --foreground { syntax: "<color>"; inherits: true; initial-value: #191a23; }
+@property --muted { syntax: "<color>"; inherits: true; initial-value: #71748a; }
+@property --faint { syntax: "<color>"; inherits: true; initial-value: #a3a6bd; }
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #6b7bf7; }
+@property --accent-ink { syntax: "<color>"; inherits: true; initial-value: #4a58d8; }
+@property --accent-soft { syntax: "<color>"; inherits: true; initial-value: #eceefe; }
+@property --mint { syntax: "<color>"; inherits: true; initial-value: #16b981; }
+@property --mint-soft { syntax: "<color>"; inherits: true; initial-value: #e3f8f0; }
+@property --rose { syntax: "<color>"; inherits: true; initial-value: #ef5d84; }
+@property --rose-soft { syntax: "<color>"; inherits: true; initial-value: #fdeaf0; }
+@property --peach { syntax: "<color>"; inherits: true; initial-value: #ec9d4b; }
+@property --peach-soft { syntax: "<color>"; inherits: true; initial-value: #fdf1e3; }
+@property --lilac { syntax: "<color>"; inherits: true; initial-value: #a78bfa; }
+@property --lilac-soft { syntax: "<color>"; inherits: true; initial-value: #f3eefe; }
+@property --border { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.07); }
+@property --border-strong { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.12); }
+@property --grid-line { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.06); }
+@property --skeleton-base { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.045); }
+@property --skeleton-shine { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.09); }
+@property --glass-bg { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.72); }
+@property --glass-border { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.85); }
+@property --glass-highlight { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.55); }
+@property --home-mesh-a { syntax: "<color>"; inherits: true; initial-value: rgba(107, 123, 247, 0.16); }
+@property --home-mesh-b { syntax: "<color>"; inherits: true; initial-value: rgba(167, 139, 250, 0.11); }
+@property --home-mesh-c { syntax: "<color>"; inherits: true; initial-value: rgba(107, 123, 247, 0.07); }
+
+@property --color-background { syntax: "<color>"; inherits: true; initial-value: #f7f6fc; }
+@property --color-card { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --color-foreground { syntax: "<color>"; inherits: true; initial-value: #191a23; }
+@property --color-muted { syntax: "<color>"; inherits: true; initial-value: #71748a; }
+@property --color-faint { syntax: "<color>"; inherits: true; initial-value: #a3a6bd; }
+@property --color-accent { syntax: "<color>"; inherits: true; initial-value: #6b7bf7; }
+@property --color-accent-ink { syntax: "<color>"; inherits: true; initial-value: #4a58d8; }
+@property --color-accent-soft { syntax: "<color>"; inherits: true; initial-value: #eceefe; }
+@property --color-mint { syntax: "<color>"; inherits: true; initial-value: #16b981; }
+@property --color-mint-soft { syntax: "<color>"; inherits: true; initial-value: #e3f8f0; }
+@property --color-rose { syntax: "<color>"; inherits: true; initial-value: #ef5d84; }
+@property --color-rose-soft { syntax: "<color>"; inherits: true; initial-value: #fdeaf0; }
+@property --color-peach { syntax: "<color>"; inherits: true; initial-value: #ec9d4b; }
+@property --color-peach-soft { syntax: "<color>"; inherits: true; initial-value: #fdf1e3; }
+@property --color-lilac { syntax: "<color>"; inherits: true; initial-value: #a78bfa; }
+@property --color-lilac-soft { syntax: "<color>"; inherits: true; initial-value: #f3eefe; }
+@property --color-border { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.07); }
+@property --color-border-strong { syntax: "<color>"; inherits: true; initial-value: rgba(25, 26, 35, 0.12); }
+
 :root {
   color-scheme: light;
 

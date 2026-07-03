@@ -11,8 +11,13 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     const root = document.documentElement;
     const isDark = root.classList.contains("dark");
     root.classList.add("theme-transition");
-    window.setTimeout(() => root.classList.remove("theme-transition"), 350);
+    // Force a reflow so the browser commits the "transitions enabled"
+    // frame before the theme value changes. Without this, next-themes
+    // flips the class in the same paint cycle as the line above, so
+    // there's no prior frame to transition from and colors just jump.
+    void root.offsetHeight;
     setTheme(isDark ? "light" : "dark");
+    window.setTimeout(() => root.classList.remove("theme-transition"), 350);
   }
 
   return (

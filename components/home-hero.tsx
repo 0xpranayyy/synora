@@ -15,14 +15,19 @@ export function HomeHero({
   return (
     <section className="relative pt-4 md:pt-8">
       <div className="relative text-center">
-        <Image
-          src="/brand/synora-wordmark.png"
-          alt="Synora"
-          width={320}
-          height={110}
-          className="reveal mx-auto mb-8 h-auto w-[228px] opacity-[0.97] drop-shadow-[0_14px_32px_rgba(74,88,216,0.14)] md:w-[300px] dark:drop-shadow-[0_16px_36px_rgba(124,137,255,0.18)]"
-          priority
-        />
+        {/* Fixed dark tile regardless of theme — the wordmark's chrome
+            palette needs a dark backdrop; it's unreadable directly on the
+            light theme's near-white page background. */}
+        <div className="reveal mx-auto mb-8 inline-block rounded-3xl bg-[#14161f] px-8 py-5 shadow-[0_14px_32px_-8px_rgba(11,13,19,0.35)] dark:shadow-[0_16px_36px_-8px_rgba(124,137,255,0.18)]">
+          <Image
+            src="/brand/synora-wordmark.png"
+            alt="Synora"
+            width={320}
+            height={110}
+            className="h-auto w-[192px] opacity-[0.97] md:w-[260px]"
+            priority
+          />
+        </div>
 
         <div className="reveal d-1 mx-auto flex w-fit flex-wrap items-center justify-center gap-2.5">
           <span className="glass-pill inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-accent-ink">
