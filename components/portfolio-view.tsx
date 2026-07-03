@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 import { useConnection } from "wagmi";
 import { WalletButton } from "@/components/wallet-button";
@@ -320,9 +320,11 @@ function PositionCard({
     >
       <div className="flex items-start gap-4">
         {position.icon ? (
-          <img
+          <Image
             src={position.icon}
             alt=""
+            width={48}
+            height={48}
             className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover shadow-[var(--shadow-card)]"
           />
         ) : (

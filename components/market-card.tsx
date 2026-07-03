@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 import type { Market } from "@/lib/types";
 import { formatUsd } from "@/lib/polymarket";
@@ -23,9 +23,11 @@ export function MarketCard({
     >
       <div className="flex items-start gap-4">
         {market.image ? (
-          <img
+          <Image
             src={market.image}
             alt=""
+            width={40}
+            height={40}
             className="h-10 w-10 rounded-xl object-cover shrink-0 border border-border"
           />
         ) : (

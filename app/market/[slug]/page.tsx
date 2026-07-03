@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ResearchView } from "@/components/research-view";
@@ -34,9 +34,11 @@ export default async function MarketPage({
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="reveal flex items-start gap-4">
         {market.image && (
-          <img
+          <Image
             src={market.image}
             alt=""
+            width={56}
+            height={56}
             className="h-14 w-14 rounded-2xl object-cover border border-border shadow-[var(--shadow-card)]"
           />
         )}

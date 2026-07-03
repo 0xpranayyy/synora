@@ -1,6 +1,17 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { withCache } from "./cache";
 import type { Confidence, Market, PricePoint, Research } from "./types";
 import { formatUsd } from "./polymarket";
+
+/**
+ * How long an AI/local-model research result is cached per market.
+ * Keyed by market only (not the free-text query) — repeat visits to
+ * the same market within this window reuse the last result instead of
+ * re-billing hosted AI, since the underlying facts don't shift meaningfully
+ * on a sub-10-minute timescale. Quant results aren't cached — they're
+ * cheap to recompute and should reflect the latest live price data.
+ */
+const RESEARCH_CACHE_TTL_SECONDS = 600;
 
 type ResearchProvider = "auto" | "anthropic" | "ollama" | "quant";
 
@@ -36,7 +47,11 @@ export async function runResearch(
 
   if ((selected === "anthropic" || selected === "auto") && hasAiCredentials()) {
     try {
-      return await aiResearch(market, history, query);
+      return await withCache(
+        `research:ai:${market.id}`,
+        RESEARCH_CACHE_TTL_SECONDS,
+        () => aiResearch(market, history, query)
+      );
     } catch (error) {
       console.error("AI research failed, falling back to quant:", error);
     }
@@ -44,7 +59,11 @@ export async function runResearch(
 
   if (selected === "ollama" || (selected === "auto" && hasOllamaConfig())) {
     try {
-      return await ollamaResearch(market, history, query);
+      return await withCache(
+        `research:local:${market.id}`,
+        RESEARCH_CACHE_TTL_SECONDS,
+        () => ollamaResearch(market, history, query)
+      );
     } catch (error) {
       console.error("Local LLM research failed, falling back to quant:", error);
     }

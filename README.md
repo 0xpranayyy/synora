@@ -36,6 +36,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `ANTHROPIC_API_KEY` | Hosted Claude for market research + portfolio review |
 | `NEXT_PUBLIC_APP_URL` | App URL for WalletConnect metadata |
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Optional WalletConnect project ID |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional — enables per-IP rate limiting and AI response caching (see Production hardening below) |
 
 For free local AI, install Ollama and pull a model:
 
@@ -53,6 +54,14 @@ MetaMask and Coinbase Wallet work without a WalletConnect project ID. For Wallet
 
 Portfolio reads use your connected wallet address, resolves the Polymarket proxy wallet when present, and fetches open positions from the Data API.
 
+## Production hardening
+
+- **Rate limiting** (`proxy.ts`) — 30 requests/60s per IP across all API routes and the AI/live-data pages, backed by Upstash Redis. Without `UPSTASH_REDIS_REST_URL`/`TOKEN` set, this fails open (no limiting) rather than breaking the app — set them before real public traffic.
+- **AI response caching** (`lib/cache.ts`) — hosted/local AI research and portfolio review results are cached per market/wallet for 5–10 minutes via the same Redis instance, so repeat visits don't re-bill the AI provider. Same fail-open behavior without Upstash configured.
+- **Live-fetch resilience** — Gamma API calls get a 10s timeout and one automatic retry on network errors/429/5xx (`lib/polymarket.ts`); a root `app/error.tsx` boundary catches anything that still fails.
+- **Security headers** (`next.config.ts`) — CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy on every response. `connect-src`/`img-src` are intentionally permissive (`https:`/`wss:`) since wallet extensions and WalletConnect's relay call a range of hosts that vary by provider — tighten these once you've confirmed your exact wallet setup.
+- Before enabling `AI_PROVIDER=anthropic` in production, set up Upstash first — without caching, every page view re-runs a full Claude Opus + web search call with no cap.
+
 ## Deploy (Vercel)
 
 1. Push the repo to GitHub.
@@ -69,6 +78,8 @@ Portfolio reads use your connected wallet address, resolves the Polymarket proxy
 - TanStack Query for client-side portfolio caching
 - Ollama-compatible local open models for free AI analysis
 - Optional `@anthropic-ai/sdk` hosted AI (server-side only)
+- `@polymarket/clob-client` — official SDK for order book, price, and trade data
+- Optional Upstash Redis for rate limiting and AI response caching
 - Inter + JetBrains Mono via `next/font`
 
 ## Structure

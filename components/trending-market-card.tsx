@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { CountUp } from "@/components/count-up";
 import { formatUsd } from "@/lib/polymarket";
@@ -38,9 +38,11 @@ export function TrendingMarketCard({
             {rank}
           </span>
           {market.image ? (
-            <img
+            <Image
               src={market.image}
               alt=""
+              width={48}
+              height={48}
               className="h-12 w-12 rounded-[14px] border border-border/80 object-cover shadow-[var(--shadow-card)] transition-transform duration-500 group-hover:scale-[1.04]"
             />
           ) : (

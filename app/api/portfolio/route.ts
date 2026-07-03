@@ -12,6 +12,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid address" }, { status: 400 });
   }
 
-  const portfolio = await getPortfolio(address);
-  return NextResponse.json(portfolio);
+  try {
+    const portfolio = await getPortfolio(address);
+    return NextResponse.json(portfolio);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Portfolio fetch failed";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }

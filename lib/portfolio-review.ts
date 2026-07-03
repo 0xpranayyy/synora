@@ -1,9 +1,13 @@
 import type { PortfolioSummary, PortfolioReview } from "./types";
+import { withCache } from "./cache";
 import {
   computeExposure,
   quantPortfolioReview,
 } from "./portfolio-analysis";
 import { hasAiCredentials, hasOllamaConfig } from "./research";
+
+/** Shorter than research caching — portfolio value shifts faster. */
+const PORTFOLIO_REVIEW_CACHE_TTL_SECONDS = 300;
 
 export type PortfolioAnalysis = {
   exposure: ReturnType<typeof computeExposure>;
@@ -28,7 +32,11 @@ export async function analyzePortfolio(
     hasAiCredentials()
   ) {
     try {
-      const ai = await aiPortfolioReview(portfolio, exposure);
+      const ai = await withCache(
+        `portfolio-review:ai:${portfolio.address}`,
+        PORTFOLIO_REVIEW_CACHE_TTL_SECONDS,
+        () => aiPortfolioReview(portfolio, exposure)
+      );
       return { exposure, review: ai };
     } catch (error) {
       console.error("AI portfolio review failed, using quant:", error);
@@ -40,7 +48,11 @@ export async function analyzePortfolio(
     (provider === "ollama" || (provider === "auto" && hasOllamaConfig()))
   ) {
     try {
-      const local = await ollamaPortfolioReview(portfolio, exposure);
+      const local = await withCache(
+        `portfolio-review:local:${portfolio.address}`,
+        PORTFOLIO_REVIEW_CACHE_TTL_SECONDS,
+        () => ollamaPortfolioReview(portfolio, exposure)
+      );
       return { exposure, review: local };
     } catch (error) {
       console.error("Local portfolio review failed, using quant:", error);
