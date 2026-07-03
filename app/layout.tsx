@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   title: "Synora — AI Research Engine for Prediction Markets",
   description:
     "Ask a question. Get probabilities, evidence, and insight before you trade.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Synora",
+  },
 };
 
 export const viewport: Viewport = {
