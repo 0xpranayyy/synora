@@ -1,0 +1,181 @@
+/* SynoraLogo.css — animation for the Synora logo reveal.
+ * The mark is anchored on the center star of the S icon (13.6% x, 48% y),
+ * which is where the whole reveal ignites. One 5.2s loop, transparent bg.
+ * Respects prefers-reduced-motion (falls back to the static logo). */
+
+.synlogo {
+  position: relative;
+  display: block;
+  animation: syn-breathe 6.5s ease-in-out infinite;
+}
+
+.synlogo__icon,
+.synlogo__word {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* left 29% of the artwork = the S icon */
+.synlogo__icon {
+  clip-path: inset(0 71% 0 0);
+  transform-origin: 13.6% 48%;
+  animation: syn-icon 5.2s ease-in-out infinite;
+}
+
+/* full artwork, wiped in from the left to reveal SYNORA */
+.synlogo__word {
+  animation: syn-word 5.2s ease-in-out infinite;
+}
+
+/* specular sweep, confined to the logo pixels via mask-image (set inline in JSX) */
+.synlogo__shimmer {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.85) 50%, transparent 60%);
+  background-size: 220% 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: syn-shimmer 5.2s ease-in-out infinite;
+}
+
+/* --- center ignition elements (positioned on the star of the S) --- */
+.synlogo__halo,
+.synlogo__glow,
+.synlogo__ray,
+.synlogo__core {
+  position: absolute;
+  left: 13.6%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.synlogo__halo {
+  width: 46%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(150,180,235,0.22), rgba(120,150,210,0.06) 55%, transparent 72%);
+  filter: blur(6px);
+  animation: syn-halo 5.2s ease-in-out infinite;
+}
+
+.synlogo__glow {
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(210,225,255,0.55), rgba(150,180,235,0.14) 45%, transparent 68%);
+  filter: blur(1px);
+  animation: syn-glow 5.2s ease-in-out infinite;
+}
+
+.synlogo__ray {
+  --rot: 0deg;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+  animation: syn-ray 5.2s ease-in-out infinite;
+}
+.synlogo__ray--v {
+  width: 2.2%;
+  aspect-ratio: 1 / 15;
+  background: linear-gradient(to bottom, transparent, rgba(235,242,255,0.95) 50%, transparent);
+}
+.synlogo__ray--h {
+  width: 20%;
+  aspect-ratio: 15 / 1;
+  background: linear-gradient(to right, transparent, rgba(235,242,255,0.9) 50%, transparent);
+}
+
+.synlogo__core {
+  width: 14%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,255,255,0.95), rgba(190,210,255,0.3) 40%, transparent 70%);
+  animation: syn-spark-core 5.2s ease-in-out infinite;
+}
+
+/* ------------------------- keyframes ------------------------- */
+@keyframes syn-spark-core {
+  0%,3%   { opacity: 0;    transform: translate(-50%,-50%) scale(0); }
+  7%      { opacity: 1;    transform: translate(-50%,-50%) scale(1.6); filter: blur(0.5px) brightness(2.2); }
+  11%     { opacity: 1;    transform: translate(-50%,-50%) scale(0.9); }
+  14%,80% { opacity: 0.95; transform: translate(-50%,-50%) scale(1); }
+  86%     { opacity: 1;    transform: translate(-50%,-50%) scale(1.25); }
+  92%     { opacity: 0.9;  transform: translate(-50%,-50%) scale(1); }
+  100%    { opacity: 0;    transform: translate(-50%,-50%) scale(0.7); }
+}
+@keyframes syn-ray {
+  0%,4%  { opacity: 0;    transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(0); }
+  8%     { opacity: 1;    transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.5); }
+  16%    { opacity: 0.55; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1); }
+  50%    { opacity: 0.12; transform: translate(-50%,-50%) rotate(calc(var(--rot) + 8deg)) scaleY(0.9); }
+  80%    { opacity: 0.22; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1); }
+  90%    { opacity: 0.9;  transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.3); }
+  100%   { opacity: 0;    transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(0.4); }
+}
+@keyframes syn-glow {
+  0%,4% { opacity: 0;   transform: translate(-50%,-50%) scale(0.2); }
+  9%    { opacity: 0.9; transform: translate(-50%,-50%) scale(1.4); }
+  16%   { opacity: 0.45;transform: translate(-50%,-50%) scale(1); }
+  50%   { opacity: 0.3; transform: translate(-50%,-50%) scale(0.92); }
+  84%   { opacity: 0.5; transform: translate(-50%,-50%) scale(1.05); }
+  100%  { opacity: 0;   transform: translate(-50%,-50%) scale(0.8); }
+}
+@keyframes syn-icon {
+  0%,5%   { opacity: 0;   transform: scale(0.16); filter: brightness(3) blur(5px); }
+  9%      { opacity: 0.5; transform: scale(0.16); filter: brightness(3) blur(4px); }
+  24%     { opacity: 1;   transform: scale(1);    filter: brightness(1) blur(0); }
+  26%,82% { opacity: 1;   transform: scale(1);    filter: brightness(1) blur(0); }
+  88%     { opacity: 1;   transform: scale(1.02); filter: brightness(1.15) blur(0); }
+  100%    { opacity: 0;   transform: scale(1.06); filter: brightness(1.4) blur(2px); }
+}
+@keyframes syn-word {
+  0%,22% { opacity: 0; clip-path: inset(0 71% 0 29%); }
+  26%    { opacity: 1; clip-path: inset(0 71% 0 29%); }
+  48%    { opacity: 1; clip-path: inset(0 0% 0 29%); }
+  82%    { opacity: 1; clip-path: inset(0 0% 0 29%); }
+  100%   { opacity: 0; clip-path: inset(0 0% 0 29%); }
+}
+@keyframes syn-shimmer {
+  0%,50% { background-position: -140% 0; }
+  64%    { background-position: 240% 0; }
+  100%   { background-position: 240% 0; }
+}
+@keyframes syn-breathe {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.012); }
+}
+@keyframes syn-halo {
+  0%,4% { opacity: 0; }
+  24%   { opacity: 0.6; }
+  50%   { opacity: 0.32; }
+  84%   { opacity: 0.55; }
+  100%  { opacity: 0; }
+}
+
+/* Accessibility: users who prefer reduced motion just see the static logo */
+@media (prefers-reduced-motion: reduce) {
+  .synlogo,
+  .synlogo * {
+    animation: none !important;
+  }
+  .synlogo__icon,
+  .synlogo__halo,
+  .synlogo__glow,
+  .synlogo__ray,
+  .synlogo__core,
+  .synlogo__shimmer {
+    display: none;
+  }
+  .synlogo__word {
+    opacity: 1;
+    clip-path: none;
+  }
+}

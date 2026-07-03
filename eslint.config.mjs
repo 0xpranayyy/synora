@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Design reference bundles — not part of the shipped app.
+    "design/**",
   ]),
 ]);
 

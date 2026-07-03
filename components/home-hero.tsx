@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { AnimatedHeadline } from "@/components/animated-headline";
 import { HomeSearch } from "@/components/home-search";
+import { SynoraLogo } from "@/components/synora-logo";
 import { formatUsd } from "@/lib/polymarket";
 
 export function HomeHero({
@@ -15,17 +15,8 @@ export function HomeHero({
   return (
     <section className="relative pt-4 md:pt-8">
       <div className="relative text-center">
-        <div className="reveal group relative mx-auto mb-8 inline-block">
-          {/* Soft ambient glow, no hard-edged backdrop — blooms on hover */}
-          <div className="pointer-events-none absolute inset-0 -z-10 scale-110 rounded-full bg-gradient-to-br from-accent/30 via-lilac/20 to-transparent opacity-70 blur-3xl transition-all duration-500 ease-out group-hover:scale-125 group-hover:opacity-100" />
-          <Image
-            src="/brand/synora-wordmark.png"
-            alt="Synora"
-            width={320}
-            height={110}
-            className="relative h-auto w-[192px] opacity-[0.97] transition-all duration-500 ease-out md:w-[260px] group-hover:scale-[1.03] group-hover:opacity-100 group-hover:drop-shadow-[0_8px_28px_rgba(124,137,255,0.4)]"
-            priority
-          />
+        <div className="reveal mx-auto mb-8 w-[192px] md:w-[260px]">
+          <SynoraLogo className="w-full" />
         </div>
 
         <div className="reveal d-1 mx-auto flex w-fit flex-wrap items-center justify-center gap-2.5">
